@@ -1,0 +1,10 @@
+{
+  "version": 2,
+  "dgSpecHash": "keUkVWVv+U3GugQw/ahQRLyQcxzdUWnu9kRYFyb7VzYM6ysL17uX7dW4SpMAhKhF6OXrRQ67lk0Nw2/lvb5+kA==",
+  "success": true,
+  "projectFilePath": "C:\\Users\\Logs2\\Desktop\\HOMEWORK\\Spring24\\CS341\\Project5\\Project5\\Project5.fsproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\Logs2\\.nuget\\packages\\fsharp.core\\8.0.200\\fsharp.core.8.0.200.nupkg.sha512"
+  ],
+  "logs": []
+}
