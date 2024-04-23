@@ -1,5 +1,5 @@
 //
-// Lexical analyzer for SimpleC programs.  This component 
+// Lexical analyzer for SimpleC programs.  This component
 // translates the input into a list of lexical units or
 // "tokens". Each token is a string, so the end result
 // is a list of strings.
@@ -26,14 +26,14 @@ module lexer =
   //
   // NOTE: all types, functions in the module must be indented.
   //
-  let private keywords = ["cin"; 
-    "cout"; 
-    "else"; 
-    "endl"; 
+  let private keywords = ["cin";
+    "cout";
+    "else";
+    "endl";
     "false";
-    "if"; 
-    "int"; 
-    "main"; 
+    "if";
+    "int";
+    "main";
     "true";
     "void";
     "real"
@@ -42,32 +42,32 @@ module lexer =
   let private identifier_start = (['a'..'z']@['A'..'Z'])
   let private identifier_chars = (['a'..'z']@['A'..'Z']@['0'..'9'])
 
-  let rec private lookupKeyword id = 
+  let rec private lookupKeyword id =
     if (List.contains id keywords) then
       id
     else // not found, so it's an identifier:
       "identifier:" + id
 
-  let private nextChar (input:System.IO.StreamReader) = 
+  let private nextChar (input:System.IO.StreamReader) =
     if input.EndOfStream then
       '$'
     else
       (char (input.Read()))
- 
-  let rec private skipRestOfLine input = 
+
+  let rec private skipRestOfLine input =
     match (nextChar input) with
     | '$'  -> ()
     | '\n' -> ()
     | '\r' -> ()
     |  _   -> skipRestOfLine input
 
-  let rec private collectID nextc input id = 
+  let rec private collectID nextc input id =
     if (List.contains nextc identifier_chars) then
       collectID (nextChar input) input (id + (string nextc))
-    else 
+    else
       (id,nextc)
 
-  let rec private collectStrLiteral nextc input literal = 
+  let rec private collectStrLiteral nextc input literal =
     match nextc with
     | '"'  -> literal  // end of string "
     | '\n' -> literal  // end of line:
@@ -75,14 +75,16 @@ module lexer =
     | '$'  -> literal  // end of file:
     |  _   -> collectStrLiteral (nextChar input) input (literal + (string nextc))
 
+  // essentially does the same thing as collectIntLiteral initially did,
+  // but includes the new output for "real_literal: "
   let rec private collectRealLiteral nextc input literal =
     if (List.contains nextc ['0'..'9']) then
       collectRealLiteral (nextChar input) input (literal + (string nextc))
     else
       ("real_literal:" + literal, nextc)
 
-  let rec private collectIntLiteral nextc input literal = 
-    if nextc = '.' then
+  let rec private collectIntLiteral nextc input literal =
+    if nextc = '.' then // switches to real when a '.' is found
       collectRealLiteral (nextChar input) input (literal + (string nextc))
     else
       if (List.contains nextc ['0'..'9']) then
@@ -90,7 +92,7 @@ module lexer =
       else
         ("int_literal:" + literal,nextc)
 
-  let rec private lexer nextc input tokens = 
+  let rec private lexer nextc input tokens =
       match nextc with
       | '$' -> List.rev ("$" :: tokens)  // EOF:
 
@@ -155,7 +157,7 @@ module lexer =
                  lexer (nextChar input) input ("||" :: tokens)
                else
                  lexer lookahead input ("unknown:|" :: tokens)
-     
+
       | '"' -> let literal = collectStrLiteral (nextChar input) input ""  // "
                lexer (nextChar input) input (("str_literal:" + literal) :: tokens)
 
@@ -171,7 +173,7 @@ module lexer =
                lexer lookahead input ((literal) :: tokens)
 
       |  _  -> lexer (nextChar input) input (("unknown:" + (string nextc)) :: tokens)
- 
+
 
   //
   // analyzer filename
@@ -179,6 +181,6 @@ module lexer =
   // Given a filename representing a SimpleC program, returns
   // a list of tokens, where each token is a sub-list.
   //
-  let analyze (filename:string) = 
+  let analyze (filename:string) =
     use input = new System.IO.StreamReader(filename)
     lexer (nextChar input) input []
