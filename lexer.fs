@@ -8,7 +8,7 @@
 //   ["void";"main";"(";")";"{";"int";"identifier:x",...]
 //
 // Modified by:
-//   << YOUR NAME >>
+//   Logan Lucas
 //
 // Original author:
 //   Prof. Joe Hummel
@@ -75,17 +75,20 @@ module lexer =
     | '$'  -> literal  // end of file:
     |  _   -> collectStrLiteral (nextChar input) input (literal + (string nextc))
 
-  let rec private collectIntLiteral nextc input literal = 
-    if (List.contains nextc ['0'..'9']) then
-      collectIntLiteral (nextChar input) input (literal + (string nextc))
-    else
-      (literal,nextc)
-  
   let rec private collectRealLiteral nextc input literal =
-    if (List.contains nextc ['0'..'9'] || nextc = '.') then
-      collectIntLiteral (nextChar input) input (literal + (string nextc))
+    if (List.contains nextc ['0'..'9']) then
+      collectRealLiteral (nextChar input) input (literal + (string nextc))
     else
-      (literal, nextc)
+      ("real_literal:" + literal, nextc)
+
+  let rec private collectIntLiteral nextc input literal = 
+    if nextc = '.' then
+      collectRealLiteral (nextChar input) input (literal + (string nextc))
+    else
+      if (List.contains nextc ['0'..'9']) then
+        collectIntLiteral (nextChar input) input (literal + (string nextc))
+      else
+        ("int_literal:" + literal,nextc)
 
   let rec private lexer nextc input tokens = 
       match nextc with
@@ -163,14 +166,9 @@ module lexer =
                lexer lookahead input (token :: tokens)
 
       |  _  when List.contains nextc ['0'..'9'] ->
-               if List.contains nextc ['.'] then
-                 // collect digits into a real literal:
-                 let (literal, lookahead) = collectRealLiteral (nextChar input) input (string nextc)
-                 lexer lookahead input (("real_literal:" + literal) :: tokens)
-               else
-                 // collect digits into an integer literal:
-                 let (literal,lookahead) = collectIntLiteral (nextChar input) input (string nextc)
-                 lexer lookahead input (("int_literal:" + literal) :: tokens)
+               // collect digits into an integer literal:
+               let (literal,lookahead) = collectIntLiteral (nextChar input) input (string nextc)
+               lexer lookahead input ((literal) :: tokens)
 
       |  _  -> lexer (nextChar input) input (("unknown:" + (string nextc)) :: tokens)
  

@@ -47,11 +47,14 @@ module parser =
       else
         if beginswith "str_literal" next_token && expected_token = "str_literal" then
           List.tail tokens
-        else // below is the original starter code for matchToken
-          if expected_token = next_token then
+        else
+          if beginswith "real_literal" next_token && expected_token = "real_literal" then
             List.tail tokens
-          else
-            failwith ("expecting " + expected_token + ", but found " + next_token)
+          else // below is the original starter code for matchToken
+            if expected_token = next_token then
+              List.tail tokens
+            else
+              failwith ("expecting " + expected_token + ", but found " + next_token)
 
 
   // empty
@@ -67,9 +70,16 @@ module parser =
   // BNF:
   // int identifier;
   let rec private vardecl tokens hasStmt =
-    let T2 = matchToken "int" tokens
-    let T3 = matchToken "identifier" T2
-    matchToken ";" T3
+    let nextToken = List.head tokens
+    
+    if nextToken = "int" then
+      let T2 = matchToken "int" tokens
+      let T3 = matchToken "identifier" T2
+      matchToken ";" T3
+    else
+      let T2 = matchToken "real" tokens
+      let T3 = matchToken "identifier" T2
+      matchToken ";" T3
   
 
   // input
@@ -92,7 +102,7 @@ module parser =
     if nextToken = "true" || nextToken = "false" then
       matchToken nextToken tokens
     else
-      if beginswith "identifier" nextToken || beginswith "int_literal" nextToken || beginswith "str_literal" nextToken then
+      if beginswith "identifier" nextToken || beginswith "int_literal" nextToken || beginswith "str_literal" nextToken || beginswith "real_literal" nextToken then
         matchToken nextToken tokens // removes the need for multiple checks since matchToken only checks if the two params are equal
       else
         failwith ("expecting identifier or literal, but found " + nextToken)
@@ -195,6 +205,7 @@ module parser =
       match nextToken with
       | ";" -> empty tokens hasStmt
       | "int" -> vardecl tokens hasStmt
+      | "real" -> vardecl tokens hasStmt
       | "cin" -> input tokens hasStmt
       | "cout" -> output tokens hasStmt
       | "identifier" -> assignment tokens hasStmt 
