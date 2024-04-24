@@ -8,6 +8,7 @@
 // legal, otherwise the string "syntax_error: ..." is
 // returned denoting an invalid SimpleC program.
 //
+// Modified by:
 // Logan Lucas
 //
 // Original author:
@@ -68,7 +69,7 @@ module parser =
   // vardecl
   //
   // BNF:
-  // int identifier;
+  // int identifier; | real identifier;
   let rec private vardecl tokens hasStmt =
     let nextToken = List.head tokens
     
@@ -95,7 +96,7 @@ module parser =
   // expr-value
   // 
   // BNF:
-  // identifier | int_literal | str_literal | true | false
+  // identifier | int_literal | real_literal | str_literal | true | false
   let rec private expr_value tokens hasStmt =
     let nextToken = List.head tokens
 
